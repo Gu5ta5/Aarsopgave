@@ -1,6 +1,8 @@
 from shopping_list import ShoppingList
 from price_list import PriceList
 
+#Søren ryge er mit idol
+
 shopping_list = ShoppingList()
 shopping_list.add_item("Apples")
 shopping_list.add_item("Bananas")
