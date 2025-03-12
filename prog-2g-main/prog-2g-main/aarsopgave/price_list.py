@@ -8,7 +8,7 @@ class PriceList:
 
     Attributes:
         current_dir (str): The directory where the current file is located.
-        pricelist (dict): A dictionary to store product names and their prices.
+        pricelist (dict): A dictionary to store product IDs, names, and their prices.
     """
 
     _instance = None
@@ -44,7 +44,11 @@ class PriceList:
         """
         with open(os.path.join(self.current_dir, filename), mode="r") as file:
             reader = csv.reader(file)
-            self.pricelist = {rows[0]: float(rows[1]) for rows in reader}
+            for rows in reader:
+                if len(rows) < 3:
+                    continue  # Skip rows that don't have enough columns
+                product_id = rows[0]
+                self.pricelist[product_id] = {"name": rows[1], "price": float(rows[2])}
 
     def save_pricelist(self, filename):
         """
@@ -55,41 +59,49 @@ class PriceList:
         """
         with open(os.path.join(self.current_dir, filename), mode="w") as file:
             writer = csv.writer(file)
-            for product, price in self.pricelist.items():
-                writer.writerow([product, price])
+            for product_id, details in self.pricelist.items():
+                writer.writerow([product_id, details["name"], details["price"]])
 
-    def get_price(self, product):
+    def get_price(self, product_id):
         """
         Returns the price of the specified product.
 
         Args:
-            product (str): The name of the product to get the price for.
+            product_id (str): The ID of the product to get the price for.
 
         Returns:
             float: The price of the product, or None if the product is not found.
         """
-        return self.pricelist.get(product, None)
+        return self.pricelist.get(product_id, {}).get("price", None)
 
-    def set_price(self, product, price):
+    def set_price(self, product_id, price):
         """
         Sets the price of the specified product.
 
         Args:
-            product (str): The name of the product to set the price for.
+            product_id (str): The ID of the product to set the price for.
             price (float): The price to set for the product.
         """
+        if product_id in self.pricelist:
+            self.pricelist[product_id]["price"] = price
 
     def get_pricelist(self):
         """
         Returns the dictionary of all pricelist and their prices.
 
         Returns:
-            dict: A dictionary of product names and their prices.
+            dict: A dictionary of product IDs, names, and their prices.
         """
         return self.pricelist
 
+    def print_pricelist(self):
+        """
+        Prints the list of all products with their IDs, names, and prices.
+        """
+        for product_id, details in self.pricelist.items():
+            print(f"ID: {product_id}, Name: {details['name']}, Price: {details['price']}")
 
 # Example usage:
 if __name__ == "__main__":
     price_list = PriceList()
-    print(price_list.get_pricelist())
+    price_list.print_pricelist()
